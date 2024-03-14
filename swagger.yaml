@@ -1,0 +1,241 @@
+swagger: '2.0'
+info:
+  title: Film library
+  version: 1.0.0
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+security:
+  - Bearer: []
+paths:
+  /actors:
+    get:
+      summary: Get a list of actors
+      responses:
+        '200':
+          description: Successful response
+        '500':
+          description: An error occurred on the server
+    post:
+      summary: Add an actor
+      parameters:
+        - in: body
+          name: actor
+          schema:
+            $ref: '#/definitions/Actor'
+      responses:
+        '201':
+          description: The actor has been added successfully
+        '400':
+          description: Invalid input
+        '409':
+          description: The actor already exists
+        '500':
+          description: An error occurred on the server
+    patch:
+      summary: Update an actor
+      parameters:
+        - in: body
+          name: actor
+          schema:
+            $ref: '#/definitions/Actor'
+      responses:
+        '200':
+          description: The actor has been updated successfully
+        '400':
+          description: Invalid input
+        '404':
+          description: The actor does not exist
+        '500':
+          description: An error occurred on the server
+    delete:
+        summary: Delete an actor
+        parameters:
+          - in: query
+            name: name
+            type: string
+            required: true
+        responses:
+          '200':
+            description: The actor has been deleted successfully
+          '404':
+            description: The actor does not exist
+          '500':
+            description: An error occurred on the server
+  /films:
+    get:
+      summary: Get a list of films
+      parameters:
+        - in: query
+          name: sort
+          type: string
+          enum: [ 'title', 'rating', 'release_date' ]
+          default: 'rating'
+          description: The field to sort by
+      responses:
+        '200':
+          description: Successful response
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Film'
+        '500':
+          description: An error occurred on the server
+    post:
+      summary: Add a film
+      parameters:
+        - in: body
+          name: film
+          schema:
+            $ref: '#/definitions/Film'
+      responses:
+        '201':
+          description: The film has been added successfully
+        '400':
+          description: Invalid input
+        '409':
+          description: The film already exists
+        '500':
+          description: An error occurred on the server
+    patch:
+      summary: Update a film
+      parameters:
+        - in: body
+          name: film
+          schema:
+            $ref: '#/definitions/Film'
+      responses:
+        '200':
+          description: The film has been updated successfully
+        '400':
+          description: Invalid input
+        '404':
+          description: The film does not exist
+        '500':
+          description: An error occurred on the server
+    delete:
+      summary: Delete a film
+      parameters:
+        - in: query
+          name: title
+          type: string
+          required: true
+      responses:
+        '200':
+          description: The film has been deleted successfully
+        '404':
+          description: The film does not exist
+        '500':
+          description: An error occurred on the server
+  /films/search:
+    get:
+      summary: Search for films
+      parameters:
+        - in: query
+          name: title
+          type: string
+          description: A fragment of the film title to search for
+        - in: query
+          name: actor
+          type: string
+          description: A fragment of the actor's name to search for
+      responses:
+        '200':
+          description: Successful response
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Film'
+        '500':
+          description: An error occurred on the server
+  /auth/register:
+    post:
+      security: []
+      summary: Register a new user
+      parameters:
+        - in: body
+          name: user
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+      responses:
+        '201':
+          description: The user has been registered successfully
+        '400':
+          description: Invalid input
+        '409':
+          description: The user already exists
+        '500':
+          description: An error occurred on the server
+  /auth/login:
+    post:
+      security: []
+      summary: Log in
+      parameters:
+        - in: body
+          name: user
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+      responses:
+        '200':
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              token:
+                type: string
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+        '500':
+          description: An error occurred on the server
+definitions:
+  Actor:
+    type: object
+    properties:
+      name:
+        type: string
+      gender:
+        type: string
+      birthdate:
+        type: string
+        format: date
+      films:
+        type: array
+        items:
+          $ref: '#/definitions/Film'
+        description: The films in which the actor has participated. The films without actors
+  Film:
+    type: object
+    properties:
+      title:
+        type: string
+        minLength: 1
+        maxLength: 150
+      description:
+        type: string
+        maxLength: 1000
+      release_date:
+        type: string
+        format: date
+      rating:
+        type: number
+        minimum: 0
+        maximum: 10
+      actors:
+        type: array
+        items:
+          $ref: '#/definitions/Actor'
+        description: The actors who participated in the film. The actors without films
